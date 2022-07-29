@@ -32,6 +32,7 @@ class GCN(torch.nn.Module):
 
 def load_data(name):
     if name == 'NELL':
+        print('./' + name + '/')
         dataset = NELL(root='./' + name + '/')
         # CUDA out of memory
         _device = torch.device('cpu')
@@ -41,7 +42,10 @@ def load_data(name):
     data = dataset[0].to(_device)
     if name == 'NELL':
         data.x = data.x.to_dense()
-    return data, dataset.num_node_features, dataset.num_classes
+        num_node_features = data.x.shape[1]
+    else:
+        num_node_features = dataset.num_node_features
+    return data, num_node_features, dataset.num_classes
 
 
 def train(model, data, device):
@@ -67,12 +71,12 @@ def test(model, data):
 
 
 def main():
-    names = ['CiteSeer', 'Cora', 'PubMed', 'NELL']
+    # names = ['CiteSeer', 'Cora', 'PubMed', 'NELL']
     names = ['CiteSeer', 'Cora', 'PubMed']
     for name in names:
         print(name + '...')
         data, num_node_features, num_classes = load_data(name)
-        print(data)
+        print(data, num_node_features, num_classes)
         _device = 'cpu' if name == 'NELL' else 'cuda'
         device = torch.device(_device)
         model = GCN(num_node_features, num_classes).to(device)
