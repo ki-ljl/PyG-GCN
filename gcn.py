@@ -1,10 +1,5 @@
 # -*- coding:utf-8 -*-
-"""
-@Time: 2022/03/12 23:21
-@Author: KI
-@File: gcn.py
-@Motto: Hungry And Humble
-"""
+
 import torch
 from torch_geometric.datasets import Planetoid, NELL
 import torch.nn.functional as F
@@ -16,16 +11,15 @@ class GCN(torch.nn.Module):
         super(GCN, self).__init__()
         self.conv1 = GCNConv(num_node_features, 32)
         self.conv2 = GCNConv(32, num_classes)
+        self.norm = torch.nn.BatchNorm1d(32)
 
     def forward(self, data):
         x, edge_index = data.x, data.edge_index
         x = self.conv1(x, edge_index)
+        x = self.norm(x)
         x = F.relu(x)
         x = F.dropout(x, training=self.training)
         x = self.conv2(x, edge_index)
-        x = F.relu(x)
-        x = F.dropout(x, training=self.training)
-        x = F.softmax(x, dim=1)
 
         return x
 
